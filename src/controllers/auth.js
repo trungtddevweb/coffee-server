@@ -11,6 +11,30 @@ export const signIn = async (req, res, next) => {
             return res
                 .status(400)
                 .json('Tên đăng nhập hoặc mật khẩu chưa chính xác.')
+
+        if (!user.isActive) {
+            return res.status(400).json('Tài khoản của bạn đã bị khóa!')
+        }
+        const accessToken = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.JWT_KEY,
+            { expiresIn: '1d' }
+        )
+        const refreshToken = jwt.sign(
+            { email: user.email },
+            process.env.JWT_KEY,
+            { expiresIn: '3d' }
+        )
+        user.accessToken = accessToken
+        user.refreshToken = refreshToken
+
+        res.cookie('jwt', refreshToken, {
+            httpOnly: true,
+            sameSite: 'None',
+            secure: false,
+            maxAge: 24 * 60 * 60 * 1000,
+        })
+        return res.status(200).json({ accessToken })
     } catch (error) {
         res.status(500).json(error)
     }
