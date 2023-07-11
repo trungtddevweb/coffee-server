@@ -1,6 +1,6 @@
 import User from '../models/User.js'
 import bcrypt from 'bcrypt'
-import jwt, { decode } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 
 export const signIn = async (req, res, next) => {
     const { email, password } = req.body
@@ -22,7 +22,7 @@ export const signIn = async (req, res, next) => {
             { expiresIn: '1d' }
         )
         const refreshToken = jwt.sign(
-            { email: user.email },
+            { email: user.email, role: user.role },
             process.env.JWT_KEY,
             { expiresIn: '365d' }
         )
@@ -47,6 +47,7 @@ export const signIn = async (req, res, next) => {
         return res.status(500).json(error)
     }
 }
+// SIGN_UP
 export const signUp = async (req, res, next) => {
     const { email, password } = req.body
     try {
@@ -64,7 +65,23 @@ export const signUp = async (req, res, next) => {
         res.status(500).json(error)
     }
 }
-export const signOut = async (req, res, next) => {}
+
+// SIGN_OUT
+export const signOut = async (req, res, next) => {
+    try {
+        const { email } = req.user
+
+        const user = await User.findOne({ email })
+        if (!user) return res.status(404).json('Không tìm thấy người dùng.')
+
+        await User.updateOne({ email }, { accessToken: null }, { new: true })
+
+        res.clearCookie('jwt').status(200).json('Đăng xuất thành công.')
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}
 
 export const googleSignIn = async (req, res, next) => {
     try {
@@ -120,7 +137,9 @@ export const refreshToken = async (req, res, next) => {
             } else {
                 // Correct token we send a new access token
                 const { email } = decoded
-                const user = User.findOne({ email, refreshToken })
+                const user = await User.findOne({ email, refreshToken })
+
+                console.log(decoded)
 
                 if (!user) {
                     return res
