@@ -1,0 +1,44 @@
+{
+    "name": "blog-server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "keywords": [],
+    "author": "",
+    "type": "module",
+    "scripts": {
+        "dev": "nodemon server.js"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    },
+    "dependencies": {
+        "axios": "^1.4.0",
+        "bcrypt": "^5.1.0",
+        "body-parse": "^0.1.0",
+        "body-parser": "^1.20.2",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "express-session": "^1.17.3",
+        "express-validator": "^7.0.1",
+        "helmet": "^7.0.0",
+        "jsonwebtoken": "^9.0.1",
+        "module-alias": "^2.2.3",
+        "mongoose": "^7.3.2",
+        "morgan": "^1.10.0",
+        "passport": "^0.6.0",
+        "passport-google-oauth20": "^2.0.0"
+    },
+    "_moduleAliases": {
+        "@root": "src",
+        "@/controllers": "src/controllers",
+        "@/models": "src/models",
+        "@/utils": "./src/utils/const.js"
+    },
+    "_moduleDirectories": [
+        "src",
+        "src/*"
+    ]
+}
