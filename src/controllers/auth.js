@@ -1,5 +1,6 @@
 import User from '../models/User.js'
 import bcrypt from 'bcrypt'
+import jwt, { decode } from 'jsonwebtoken'
 
 export const signIn = async (req, res, next) => {
     const { email, password } = req.body
@@ -16,17 +17,23 @@ export const signIn = async (req, res, next) => {
             return res.status(400).json('Tài khoản của bạn đã bị khóa!')
         }
         const accessToken = jwt.sign(
-            { userId: user._id, role: user.role },
+            { role: user.role, email: user.email },
             process.env.JWT_KEY,
             { expiresIn: '1d' }
         )
         const refreshToken = jwt.sign(
             { email: user.email },
             process.env.JWT_KEY,
-            { expiresIn: '3d' }
+            { expiresIn: '365d' }
         )
         user.accessToken = accessToken
         user.refreshToken = refreshToken
+
+        await User.findOneAndUpdate(
+            { email },
+            { accessToken, refreshToken },
+            { new: true }
+        )
 
         res.cookie('jwt', refreshToken, {
             httpOnly: true,
@@ -36,7 +43,8 @@ export const signIn = async (req, res, next) => {
         })
         return res.status(200).json({ accessToken })
     } catch (error) {
-        res.status(500).json(error)
+        console.log('error', error)
+        return res.status(500).json(error)
     }
 }
 export const signUp = async (req, res, next) => {
@@ -94,5 +102,49 @@ export const googleSignIn = async (req, res, next) => {
         res.status(500).json({
             message: 'Đã xảy ra lỗi trong quá trình xử lý yêu cầu',
         })
+    }
+}
+
+export const refreshToken = async (req, res, next) => {
+    if (req.cookies?.jwt) {
+        // Destructuring refreshToken from cookie
+        const refreshToken = req.cookies.jwt
+
+        // Verifying refresh token
+        jwt.verify(refreshToken, process.env.JWT_KEY, async (err, decoded) => {
+            if (err) {
+                // Wrong Refesh Token
+                return res
+                    .status(403)
+                    .json({ message: 'RefreshToken không hợp lệ' })
+            } else {
+                // Correct token we send a new access token
+                const { email } = decoded
+                const user = User.findOne({ email, refreshToken })
+
+                if (!user) {
+                    return res
+                        .status(403)
+                        .json({ message: 'RefreshToken không hợp lệ' })
+                }
+                const accessToken = jwt.sign(
+                    { email: user.email, role: user.role },
+                    process.env.JWT_KEY,
+                    {
+                        expiresIn: '1d',
+                    }
+                )
+                user.accessToken = accessToken
+
+                await User.findOneAndUpdate(
+                    { email },
+                    { accessToken },
+                    { new: true }
+                )
+                return res.status(200).json({ accessToken })
+            }
+        })
+    } else {
+        return res.status(401).json({ message: 'Không tìm thấy refreshToken' })
     }
 }
