@@ -1,28 +1,34 @@
 import User from '../models/User.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import axios from 'axios'
 
+// SIGN_IN
 export const signIn = async (req, res, next) => {
     const { email, password } = req.body
     try {
         const user = await User.findOne({ email })
         if (!user) return res.status(400).json('Người dùng không tồn tại.')
+        if (user.googleLogin) {
+            return res.status(400).json('Tài khoản đã liên kết với google.')
+        }
+        if (!user.isActive) {
+            return res.status(400).json('Tài khoản của bạn đã bị khóa!')
+        }
+
         const isCorrect = await bcrypt.compare(password, user.password)
         if (!isCorrect)
             return res
                 .status(400)
                 .json('Tên đăng nhập hoặc mật khẩu chưa chính xác.')
 
-        if (!user.isActive) {
-            return res.status(400).json('Tài khoản của bạn đã bị khóa!')
-        }
         const accessToken = jwt.sign(
-            { role: user.role, email: user.email },
+            { role: user.role, email: user.email, name: user.name },
             process.env.JWT_KEY,
             { expiresIn: '1d' }
         )
         const refreshToken = jwt.sign(
-            { email: user.email, role: user.role },
+            { email: user.email, role: user.role, name: user.name },
             process.env.JWT_KEY,
             { expiresIn: '365d' }
         )
@@ -70,11 +76,12 @@ export const signUp = async (req, res, next) => {
 export const signOut = async (req, res, next) => {
     try {
         const { email } = req.user
+        console.log('email', email)
 
         const user = await User.findOne({ email })
         if (!user) return res.status(404).json('Không tìm thấy người dùng.')
 
-        await User.updateOne({ email }, { accessToken: null }, { new: true })
+        await user.updateOne({ accessToken: null }, { new: true })
 
         res.clearCookie('jwt').status(200).json('Đăng xuất thành công.')
     } catch (error) {
@@ -82,37 +89,48 @@ export const signOut = async (req, res, next) => {
         return res.status(500).json(error)
     }
 }
-
+// SIGN_IN_WITH_GOOGLE
 export const googleSignIn = async (req, res, next) => {
     try {
         const { idToken } = req.body
 
-        // Gửi yêu cầu kiểm tra thông tin người dùng đến Google
         const googleResponse = await axios.get(
             `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`
         )
-        const { email } = googleResponse.data
+        const { email, name, picture } = googleResponse.data
 
-        console.log('Response: ', response)
-
-        // Kiểm tra email trong cơ sở dữ liệu
         const existingUser = await User.findOne({ email })
+        const accessToken = jwt.sign(
+            {
+                role: existingUser ? existingUser.role : 'user',
+                email: existingUser ? existingUser.email : email,
+                name: existingUser ? existingUser.name : name,
+            },
+            process.env.JWT_KEY,
+            { expiresIn: '1d' }
+        )
+        res.cookie('jwt', accessToken, {
+            httpOnly: true,
+            sameSite: 'None',
+            secure: false,
+            maxAge: 24 * 60 * 60 * 1000,
+        })
 
         if (existingUser) {
-            // Đã tồn tại người dùng, thực hiện đăng nhập và gửi thông tin người dùng về
-            // Lưu ý: Đây chỉ là ví dụ, bạn cần thay đổi phần logic này theo cấu trúc và quyền hạn của ứng dụng của mình
-            res.json({ message: 'Đăng nhập thành công', user: existingUser })
+            await existingUser.updateOne({ accessToken }, { new: true })
+            res.status(200).json({ accessToken })
         } else {
-            // Người dùng chưa tồn tại, tạo mới người dùng và gửi thông tin về
-            // Lưu ý: Đây chỉ là ví dụ, bạn cần thay đổi phần logic này theo cấu trúc và quyền hạn của ứng dụng của mình
-            const newUser = User({})
+            const newUser = User({
+                name,
+                email,
+                refreshToken: idToken,
+                accessToken,
+                avtUrl: picture,
+                googleLogin: true,
+            })
 
             await newUser.save()
-
-            res.json({
-                message: 'Tạo người dùng mới thành công',
-                user: newUser,
-            })
+            res.status(200).json({ accessToken })
         }
     } catch (error) {
         console.log(error)
@@ -122,6 +140,7 @@ export const googleSignIn = async (req, res, next) => {
     }
 }
 
+// REFRESH_TOKEN
 export const refreshToken = async (req, res, next) => {
     if (req.cookies?.jwt) {
         // Destructuring refreshToken from cookie
@@ -139,15 +158,13 @@ export const refreshToken = async (req, res, next) => {
                 const { email } = decoded
                 const user = await User.findOne({ email, refreshToken })
 
-                console.log(decoded)
-
                 if (!user) {
                     return res
                         .status(403)
                         .json({ message: 'RefreshToken không hợp lệ' })
                 }
                 const accessToken = jwt.sign(
-                    { email: user.email, role: user.role },
+                    { email: user.email, role: user.role, name: user.name },
                     process.env.JWT_KEY,
                     {
                         expiresIn: '1d',

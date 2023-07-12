@@ -44,6 +44,10 @@ const UserSchema = new Schema(
             type: String,
             default: null,
         },
+        googleLogin: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,

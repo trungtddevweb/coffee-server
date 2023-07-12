@@ -14,14 +14,12 @@ const PostSchema = new Schema(
         },
         content: {
             type: String,
-            unique: true,
             required: true,
-            lowercase: true,
         },
         imagesUrl: {
-            type: [String],
+            type: String,
             required: true,
-            default: [],
+            default: '',
         },
         public: {
             type: Boolean,
@@ -31,9 +29,7 @@ const PostSchema = new Schema(
             type: Boolean,
             default: false,
         },
-        likes: [
-            { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true },
-        ],
+        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
         tag: {
             type: String,

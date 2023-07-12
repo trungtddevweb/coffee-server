@@ -5,13 +5,9 @@ export const verifyAdmin = (req, res, next) => {}
 
 export const verifyUser = async (req, res, next) => {
     if (req.cookies?.jwt) {
-        // Destructuring refreshToken from cookie
         const accessToken = req.cookies.jwt
-
-        // Verifying refresh token
         jwt.verify(accessToken, process.env.JWT_KEY, async (err, decoded) => {
             if (err) {
-                // Wrong Refesh Token
                 return res
                     .status(403)
                     .json({ message: 'Access_Token không hợp lệ' })
