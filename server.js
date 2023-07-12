@@ -18,7 +18,6 @@ app.use(
         origin: ['http://localhost:5173', 'https://coffee-sweet.vercel.app'],
         optionsSuccessStatus: 200,
         credentials: true,
-        exposedHeaders: ['set-cookie'],
     })
 )
 app.use(cookieParser())
