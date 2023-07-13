@@ -12,3 +12,12 @@ export const CLIENT_SECRET = process.env.CLIENT_SECRET
 export const CLOUD_NAME = process.env.CLOUD_NAME
 export const CLOUD_API_KEY = process.env.CLOUD_API_KEY
 export const CLOUD_API_SECRET = process.env.CLOUD_API_SECRET
+
+export const optionsPaginate = (limit, page, ...rest) => {
+    return {
+        limit: parseInt(limit, 10) || 10,
+        page: parseInt(page, 10) || 1,
+        sort: { createdAt: 'desc' },
+        ...rest,
+    }
+}

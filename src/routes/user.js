@@ -1,8 +1,10 @@
 import express from 'express'
+import { getAUser } from '../controllers/user.js'
+import { verifyAdmin } from '../middlewares/verify.js'
 
 const router = express.Router()
 
-// router.use('/auth')
+router.get('/find-user/:userId', verifyAdmin, getAUser)
 
 // router.use('/post')
 

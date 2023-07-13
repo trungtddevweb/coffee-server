@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
 
 const { Schema } = mongoose
 
@@ -24,6 +25,8 @@ const Commnent = new Schema(
         timestamps: true,
     }
 )
+
+Commnent.plugin(mongoosePaginate)
 
 const Comment = mongoose.model('Comment', Commnent)
 export default Comment

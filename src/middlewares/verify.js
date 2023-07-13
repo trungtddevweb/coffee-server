@@ -1,8 +1,5 @@
 import jwt from 'jsonwebtoken'
-import User from '../models/User.js'
 import { JWT_KEY } from '../utils/const.js'
-
-export const verifyAdmin = (req, res, next) => {}
 
 export const verifyUser = async (req, res, next) => {
     if (!req.headers['authorization'])
@@ -20,5 +17,22 @@ export const verifyUser = async (req, res, next) => {
             status: 'Invalid',
             message: 'Token không hợp lệ.',
         })
+    }
+}
+
+export const verifyAdmin = async (req, res, next) => {
+    try {
+        verifyUser(req, res, () => {
+            if (req.user && req.user.role === 'admin') {
+                next() // Cho phép tiếp tục middleware tiếp theo
+            } else {
+                res.status(401).json({
+                    status: 'Unauthorized',
+                    message: 'Bạn không có quyền làm điều này.',
+                })
+            }
+        })
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error })
     }
 }
