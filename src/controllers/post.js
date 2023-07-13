@@ -33,11 +33,13 @@ export const createPost = async (req, res, next) => {
 // GET ALL POST
 export const getAllPost = async (req, res, next) => {
     const { page, limit } = req.body
+
     try {
         const posts = await Post.paginate(
             { public: true },
-            optionsPaginate(limit, page)
+            optionsPaginate(limit, page, { populate: 'author' })
         )
+
         res.status(200).json({ status: 'Success', data: posts })
     } catch (error) {
         console.log(error)
@@ -135,3 +137,19 @@ export const updatedPostHasPublic = async (req, res) => {
 //         res.status(500).json({ status: 'error', message: error })
 //     }
 // }
+
+// GET BY TAG
+export const getPostByTagName = async (req, res) => {
+    const { tagName } = req.params
+    const { limit, page } = req.query
+    try {
+        const collections = await Post.paginate(
+            { tag: tagName },
+            optionsPaginate(limit, page, { populate: 'author' })
+        )
+        res.status(200).json({ status: 'Success', data: collections })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ status: 'error', message: error })
+    }
+}
