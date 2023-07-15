@@ -144,10 +144,24 @@ export const getPostByTagName = async (req, res) => {
     const { limit, page } = req.query
     try {
         const collections = await Post.paginate(
-            { tag: tagName },
+            { tag: tagName, public: true },
             optionsPaginate(limit, page, { populate: 'author' })
         )
         res.status(200).json({ status: 'Success', data: collections })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ status: 'error', message: error })
+    }
+}
+
+export const getPostTrending = async (req, res) => {
+    const { limit, page } = req.query
+    try {
+        const posts = await Post.paginate(
+            { public: true },
+            optionsPaginate(limit, page, { sort: { likes: -1 } })
+        )
+        res.status(200).json({ status: 'Success', data: posts })
     } catch (error) {
         console.log(error)
         res.status(500).json({ status: 'error', message: error })

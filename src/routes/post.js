@@ -4,6 +4,7 @@ import {
     getAllPost,
     getDetailPost,
     getPostByTagName,
+    getPostTrending,
     updatedPostHasPublic,
 } from '../controllers/post.js'
 import { verifyUser } from '../middlewares/verify.js'
@@ -12,9 +13,11 @@ const router = express.Router()
 
 router.post('/create', verifyUser, uploadCloudPost.single('image'), createPost)
 
+router.get('/trending', getPostTrending)
+
 router.get('/all-post', getAllPost)
 
-router.get('/:postId', getDetailPost)
+router.get('/find/:postId', getDetailPost)
 
 router.put('/update-post-public', verifyUser, updatedPostHasPublic)
 
