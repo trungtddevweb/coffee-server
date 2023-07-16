@@ -109,7 +109,7 @@ export const googleSignIn = async (req, res) => {
 
         if (existingUser) {
             await existingUser.updateOne({ accessToken }, { new: true })
-            res.status(200).json({ accessToken })
+            res.status(200).json({ accessToken, userId: existingUser._id })
         } else {
             const newUser = User({
                 name,
@@ -121,7 +121,7 @@ export const googleSignIn = async (req, res) => {
             })
 
             await newUser.save()
-            res.status(200).json({ accessToken })
+            res.status(200).json({ accessToken, userId: newUser._id })
         }
     } catch (error) {
         console.log(error)
