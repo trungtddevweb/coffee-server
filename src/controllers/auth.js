@@ -42,7 +42,7 @@ export const signIn = async (req, res) => {
             { new: true }
         )
         res.setHeader('Authorization', `Bearer ${accessToken}`)
-        return res.status(200).json({ accessToken })
+        return res.status(200).json({ accessToken, userId: user._id })
     } catch (error) {
         console.log('error', error)
         return res.status(500).json(error)

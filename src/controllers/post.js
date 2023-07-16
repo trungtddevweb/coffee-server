@@ -159,7 +159,10 @@ export const getPostTrending = async (req, res) => {
     try {
         const posts = await Post.paginate(
             { public: true },
-            optionsPaginate(limit, page, { sort: { likes: -1 } })
+            optionsPaginate(limit, page, {
+                sort: { likes: -1 },
+                populate: 'author',
+            })
         )
         res.status(200).json({ status: 'Success', data: posts })
     } catch (error) {
