@@ -25,7 +25,7 @@ const UserSchema = new Schema(
             default: '',
         },
         posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
-        postsLiked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+        postsSaved: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
         queuePosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
         draftPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
         isActive: {

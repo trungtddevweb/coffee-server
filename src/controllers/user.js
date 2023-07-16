@@ -32,7 +32,7 @@ export const getAllUsers = async (req, res) => {
 }
 
 // POST
-export const getsSavedPosts = async (req, res) => {
+export const getAllPostSaved = async (req, res) => {
     const { limit, page } = req.query
     const { email } = req.user
     try {
@@ -43,7 +43,7 @@ export const getsSavedPosts = async (req, res) => {
                 message: 'Không tìm thấy người dùng.',
             })
 
-        const savedPosts = user.postsLiked // Lầ 1 mảng chứa các _id của posts
+        const savedPosts = user.postsSaved
         const posts = await Post.paginate(
             { _id: { $in: savedPosts } },
             optionsPaginate(limit, page)
@@ -51,6 +51,46 @@ export const getsSavedPosts = async (req, res) => {
         res.status(200).json({
             status: 'Success',
             data: posts,
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ status: 'error', message: error })
+    }
+}
+
+export const savePostToUser = async (req, res) => {
+    const { email } = req.user
+    const { postId } = req.body
+    try {
+        const user = await User.findOne({ email })
+        if (!user)
+            return res.status(404).json({
+                status: 'Not Found',
+                message: 'Không tìm thấy người dùng.',
+            })
+        const userId = user._id
+        const post = await Post.findById(postId)
+        if (!post) {
+            return res.status(404).json({ message: 'Bài viết không tồn tại' })
+        }
+
+        const index = user.postsSaved.indexOf(userId)
+
+        if (index === -1) {
+            user.postsSaved.push(userId)
+        } else {
+            return res.status(400).json({
+                status: 'Error',
+                message: 'Bài viết đã có trong mục đã lưu.',
+            })
+        }
+
+        await user.save()
+
+        res.status(200).json({
+            status: 'Success',
+            message: 'Lưu bài viết thành công.',
+            data: user,
         })
     } catch (error) {
         console.log(error)

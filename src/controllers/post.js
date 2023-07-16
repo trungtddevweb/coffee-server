@@ -170,3 +170,34 @@ export const getPostTrending = async (req, res) => {
         res.status(500).json({ status: 'error', message: error })
     }
 }
+
+export const toggleLikePost = async (req, res) => {
+    const { postId } = req.body
+    const { email } = req.user
+    try {
+        const user = await User.findOne({ email })
+        const userId = user._id
+        const post = await Post.findById(postId)
+
+        if (!post) {
+            return res.status(404).json({ message: 'Bài viết không tồn tại' })
+        }
+
+        const index = post.likes.indexOf(userId)
+
+        if (index === -1) {
+            post.likes.push(userId)
+        } else {
+            post.likes.splice(index, 1)
+        }
+        await post.save()
+        res.status(200).json({
+            status: 'Success',
+            message: 'Thích bài viết thành công.',
+            data: post,
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ status: 'error', message: error })
+    }
+}
