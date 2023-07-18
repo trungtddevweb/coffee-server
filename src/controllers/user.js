@@ -68,16 +68,15 @@ export const savePostToUser = async (req, res) => {
                 status: 'Not Found',
                 message: 'Không tìm thấy người dùng.',
             })
-        const userId = user._id
         const post = await Post.findById(postId)
         if (!post) {
             return res.status(404).json({ message: 'Bài viết không tồn tại' })
         }
 
-        const index = user.postsSaved.indexOf(userId)
+        const index = user.postsSaved.indexOf(postId)
 
         if (index === -1) {
-            user.postsSaved.push(userId)
+            user.postsSaved.push(postId)
         } else {
             return res.status(400).json({
                 status: 'Error',
