@@ -19,6 +19,7 @@ const UserSchema = new Schema(
         },
         password: {
             type: String,
+            select: false,
         },
         avtUrl: {
             type: String,
@@ -40,10 +41,12 @@ const UserSchema = new Schema(
         accessToken: {
             type: String,
             default: null,
+            select: false,
         },
         refreshToken: {
             type: String,
             default: null,
+            select: false,
         },
         googleLogin: {
             type: Boolean,

@@ -10,7 +10,7 @@ import {
 export const signIn = async (req, res) => {
     const { email, password } = req.body
     try {
-        const user = await User.findOne({ email })
+        const user = await User.findOne({ email }).select('+password')
         if (!user) return res.status(400).json('Người dùng không tồn tại.')
         if (user.googleLogin) {
             return res.status(400).json('Tài khoản đã liên kết với google.')
@@ -19,7 +19,7 @@ export const signIn = async (req, res) => {
             return res.status(400).json('Tài khoản của bạn đã bị khóa!')
         }
 
-        const isCorrect = await bcrypt.compare(password, user.password)
+        const isCorrect = bcrypt.compare(password, user.password)
         if (!isCorrect)
             return res
                 .status(400)
@@ -42,7 +42,11 @@ export const signIn = async (req, res) => {
             { new: true }
         )
         res.setHeader('Authorization', `Bearer ${accessToken}`)
-        return res.status(200).json({ accessToken, userId: user._id })
+        return res.status(200).json({
+            accessToken,
+            userId: user._id,
+            postsSaved: user.postsSaved,
+        })
     } catch (error) {
         console.log('error', error)
         return res.status(500).json(error)
@@ -109,7 +113,11 @@ export const googleSignIn = async (req, res) => {
 
         if (existingUser) {
             await existingUser.updateOne({ accessToken }, { new: true })
-            res.status(200).json({ accessToken, userId: existingUser._id })
+            res.status(200).json({
+                accessToken,
+                userId: existingUser._id,
+                postsSaved: existingUser.postsSaved,
+            })
         } else {
             const newUser = User({
                 name,
@@ -121,7 +129,11 @@ export const googleSignIn = async (req, res) => {
             })
 
             await newUser.save()
-            res.status(200).json({ accessToken, userId: newUser._id })
+            res.status(200).json({
+                accessToken,
+                userId: newUser._id,
+                postsSaved: [],
+            })
         }
     } catch (error) {
         console.log(error)

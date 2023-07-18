@@ -97,3 +97,31 @@ export const savePostToUser = async (req, res) => {
         res.status(500).json({ status: 'error', message: error })
     }
 }
+
+export const removePostSaved = async (req, res) => {
+    const { postId } = req.body
+    const { email } = req.user
+    try {
+        const user = await User.findOne({ email })
+        if (!user)
+            return res.status(404).json({
+                status: 'Not Found',
+                message: 'Không tìm thấy người dùng.',
+            })
+        const indexPost = user.postsSaved.indexOf(postId)
+        if (indexPost === -1) {
+            return res.status(404).json({
+                status: 'Not Found',
+                message: 'Bài viết không tồn tại trong mục đã lưu của bạn.',
+            })
+        } else {
+            user.postsSaved.splice(indexPost, 1)
+        }
+        await user.save()
+
+        res.status(200).json({ status: 'Success', data: user.postsSaved })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ status: 'error', message: error })
+    }
+}
