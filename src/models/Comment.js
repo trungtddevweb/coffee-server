@@ -17,9 +17,7 @@ const Commnent = new Schema(
             type: String,
             required: true,
         },
-        likes: [
-            { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true },
-        ],
+        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     },
     {
         timestamps: true,
