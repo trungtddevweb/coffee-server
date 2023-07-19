@@ -52,7 +52,7 @@ export const getDetailPost = async (req, res) => {
     try {
         const post = await Post.findById(postId)
             .populate('author')
-            .populate('likes')
+            .populate('comments')
         if (!post)
             return res.status(404).json({
                 status: 'Not Found',
