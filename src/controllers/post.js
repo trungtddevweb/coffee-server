@@ -50,7 +50,9 @@ export const getAllPost = async (req, res, next) => {
 export const getDetailPost = async (req, res) => {
     const { postId } = req.params
     try {
-        const post = await Post.findById(postId).populate('author')
+        const post = await Post.findById(postId)
+            .populate('author')
+            .populate('likes')
         if (!post)
             return res.status(404).json({
                 status: 'Not Found',
