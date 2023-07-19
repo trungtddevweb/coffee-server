@@ -31,6 +31,7 @@ export const createNewComment = async (req, res) => {
         res.status(201).json({
             status: 'Success',
             message: 'Tạo mới comment thành công!',
+            data: newComment._id,
         })
     } catch (error) {
         console.log(error)
@@ -66,7 +67,7 @@ export const updateComment = async (req, res) => {
         res.status(200).json({
             status: 'Success',
             message: 'Cập nhật bình luận thành công.',
-            updatedComment,
+            data: updatedComment,
         })
     } catch (error) {
         console.log(error)
