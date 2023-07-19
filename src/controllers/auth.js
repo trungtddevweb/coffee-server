@@ -46,6 +46,8 @@ export const signIn = async (req, res) => {
             accessToken,
             userId: user._id,
             postsSaved: user.postsSaved,
+            name: user.name,
+            avtUrl: user.avtUrl,
         })
     } catch (error) {
         console.log('error', error)
@@ -117,6 +119,8 @@ export const googleSignIn = async (req, res) => {
                 accessToken,
                 userId: existingUser._id,
                 postsSaved: existingUser.postsSaved,
+                name: existingUser.name,
+                avtUrl: existingUser.avtUrl,
             })
         } else {
             const newUser = User({
@@ -133,6 +137,8 @@ export const googleSignIn = async (req, res) => {
                 accessToken,
                 userId: newUser._id,
                 postsSaved: [],
+                name: newUser.name,
+                avtUrl: newUser.avtUrl,
             })
         }
     } catch (error) {
