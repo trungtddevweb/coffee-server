@@ -1,5 +1,6 @@
 import Comment from '../models/Comment.js'
 import User from '../models/User.js'
+import Post from '../models/Post.js'
 
 export const createNewComment = async (req, res) => {
     const { email } = req.user
@@ -12,13 +13,25 @@ export const createNewComment = async (req, res) => {
                 status: 'Not Found',
                 message: 'Người dùng không tồn tại.',
             })
+        const post = await Post.findById(postId)
+        if (!post)
+            return res.status(404).json({
+                status: 'Not Found',
+                message: 'Bài viết không tồn tại.',
+            })
         const newComment = Comment({
             content,
             postId,
             userId: user._id,
         })
         await newComment.save()
-        res.status(201).json({ status: 'Success', data: newComment })
+        post.comments.push(newComment._id)
+        await post.save()
+
+        res.status(201).json({
+            status: 'Success',
+            message: 'Tạo mới comment thành công!',
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({ status: 'error', message: error })
