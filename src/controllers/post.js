@@ -52,7 +52,13 @@ export const getDetailPost = async (req, res) => {
     try {
         const post = await Post.findById(postId)
             .populate('author')
-            .populate('comments')
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'userId',
+                    model: 'User',
+                },
+            })
         if (!post)
             return res.status(404).json({
                 status: 'Not Found',
