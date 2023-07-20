@@ -25,13 +25,21 @@ export const createNewComment = async (req, res) => {
             userId: user._id,
         })
         await newComment.save()
-        post.comments.push(newComment._id)
+
+        post.comments.push({
+            userId: newComment.userId,
+            commentId: newComment._id,
+            content: newComment.content,
+            likes: newComment.likes,
+            createdAt: newComment.createdAt,
+            updatedAt: newComment.updatedAt,
+        })
         await post.save()
 
         res.status(201).json({
             status: 'Success',
             message: 'Tạo mới comment thành công!',
-            data: newComment._id,
+            data: newComment,
         })
     } catch (error) {
         console.log(error)
