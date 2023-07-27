@@ -124,3 +124,36 @@ export const removePostSaved = async (req, res) => {
         res.status(500).json({ status: 'error', message: error })
     }
 }
+
+export const updatedUser = async (req, res) => {
+    const { email } = req.user
+    try {
+        const user = await User.findOneAndUpdate(
+            { email },
+            { ...req.body },
+            {
+                new: true,
+            }
+        )
+
+        if (!user) {
+            // Nếu không tìm thấy người dùng, trả về thông báo lỗi
+            return res.status(404).json({
+                status: 404,
+                message: 'Không tìm thấy người dùng với email đã cung cấp.',
+            })
+        }
+
+        return res.status(200).json({
+            status: 200,
+            message: 'Cập nhập thông tin người dùng thành công.',
+            data: user,
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            status: 'error',
+            message: error,
+        })
+    }
+}

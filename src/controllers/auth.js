@@ -48,6 +48,7 @@ export const signIn = async (req, res) => {
             postsSaved: user.postsSaved,
             name: user.name,
             avtUrl: user.avtUrl,
+            email: user.email,
         })
     } catch (error) {
         console.log('error', error)
@@ -121,6 +122,7 @@ export const googleSignIn = async (req, res) => {
                 postsSaved: existingUser.postsSaved,
                 name: existingUser.name,
                 avtUrl: existingUser.avtUrl,
+                email: existingUser.email,
             })
         } else {
             const newUser = User({
@@ -139,6 +141,7 @@ export const googleSignIn = async (req, res) => {
                 postsSaved: [],
                 name: newUser.name,
                 avtUrl: newUser.avtUrl,
+                email: newUser.email,
             })
         }
     } catch (error) {

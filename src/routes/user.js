@@ -4,6 +4,7 @@ import {
     getAllPostSaved,
     removePostSaved,
     savePostToUser,
+    updatedUser,
 } from '../controllers/user.js'
 import { verifyAdmin, verifyUser } from '../middlewares/verify.js'
 
@@ -17,6 +18,6 @@ router.post('/saved-post', verifyUser, savePostToUser)
 
 router.post('/remove-post-saved', verifyUser, removePostSaved)
 
-// router.use('/user')
+router.patch('/update-user', verifyUser, updatedUser)
 
 export default router

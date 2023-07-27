@@ -13,9 +13,9 @@ export const verifyUser = async (req, res, next) => {
         req.user = decoded
         next()
     } catch (error) {
-        return res.status(403).json({
-            status: 'Invalid',
-            message: 'Token không hợp lệ.',
+        return res.status(400).json({
+            name: error.name,
+            message: error.message,
         })
     }
 }
